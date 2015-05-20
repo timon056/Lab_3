@@ -1,138 +1,48 @@
 package Lab3;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.math.MathContext;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Created by Andrew on 25.03.2015.
+ */
 public class Lab3 {
-    static List<String> lines;
+    private static ArrayList<String> names = new ArrayList<String>();
+
     public static void main(String[] args) {
 
-        File testFile = new File("test.txt");
-        lines = new ArrayList<String>();
-        GetContents(testFile);
-        write("out.txt", lines);
+        System.out.println(removeNamesStage2(removeNumbers(removeNamesStage1("Pismo Vladimiru gorod Habarovsk, proshu vydelit' neobhodimuju denezhnuju summu soglasno prilagaemomu spisku. Maxima vchera ne bilo na rabote. Poprosi Maxima predostavit' remontnuju brigadu dlja provedenija rabot. Vot ego telefon 89228833101"))));
+        System.out.println("Names found:");
+        for(String name : names){
+            System.out.println(name);
+        }
+    }
+    public static String removeNamesStage1(String nameString){
+        String out = "";
+        Integer lastEnd = 0;
+        Pattern p = Pattern.compile("[^!?.\\s]\\s?[A-Z][a-z]+");
+        Matcher m = p.matcher(nameString);
+        while(m.find()){
+            out+=nameString.substring(lastEnd, m.start()+1)+ "[censored]";
+            names.add(nameString.substring(m.start()+1, m.end()).trim());
+            lastEnd = m.end();
+        }
+        out+=nameString.substring(lastEnd);
+        return out;
 
     }
-    public static boolean checkWithRegExpName(String testString){
-        Pattern name = Pattern.compile("^[À-ß]{1}[à-ÿ]{2,15}$");
 
-        Matcher match = name.matcher(testString);
-        while(match.find()) {
-            System.out.println(testString.substring(match.start(), match.end()));
+    public static String removeNamesStage2(String nameString){
+        for(String name : names){
+            nameString = nameString.replace(name, "[censored]");
         }
-        return match.matches();
+        return  nameString;
     }
 
-    public static boolean checkWithRegExpPhone(String testString){
-        Pattern phone = Pattern.compile("^[+]{0,1}[- (),0-9]{7,}$");
-        Matcher match = phone.matcher(testString);
-        while(match.find()) {
-            System.out.println(testString.substring(match.start(), match.end()));
-        }
-        return match.matches();
-    }
-    public static boolean checkWithRegExpEmail(String testString){
-        Pattern phone = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-        Matcher match = phone.matcher(testString);
-        while(match.find()) {
-            System.out.println(testString.substring(match.start(), match.end()));
-        }
-        return match.matches();
-    }
-    static public void GetContents(File file)
-    {
-
-        try
-        {
-            if (file == null)
-            {
-                throw new IllegalArgumentException("File should not be null.");
-            }
-
-            if (!file.exists())
-            {
-                throw new FileNotFoundException();
-            }
-
-            if (!file.canRead())
-
-            {
-                throw new IllegalArgumentException("File cannot be written:" + file);
-            }
-
-            if (!file.isFile())
-            {
-                throw new IllegalArgumentException("Should not be a directory: " + file);
-            }
-
-            FileInputStream fis = new FileInputStream(file);
-            InputStreamReader in = new InputStreamReader(fis);
-            BufferedReader input = new BufferedReader(in);
-
-            String line = null;
-            try{
-                while ((line = input.readLine()) != null)
-                {
-                    String[] test =  line.trim().split("[,;:!?\\s]+");
-                    for(int i =0; i < test.length; i++)
-                    {
-                        if(checkWithRegExpName(test[i]) || checkWithRegExpPhone(test[i]) || checkWithRegExpEmail(test[i]) )
-                        {
-                            test[i]= "[censored]";
-                        }
-                        lines.add(test[i]+ ' ');
-                    }
-
-                }
-            }
-            finally{
-                input.close();
-            }
-        }
-        catch (FileNotFoundException ex)
-        {
-            System.out.println("File does not exist: " + file);
-        }
-        catch(IllegalArgumentException ex)
-        {
-            System.out.println(ex.getMessage());
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-
-    }
-    public static void write(String fileName, List<String> list) {
-        File file = new File(fileName);
-        String [] linesAsArray = list.toArray(new String[list.size()]);
-        try {
-            if(!file.exists()){
-                file.createNewFile();
-            }
-
-            PrintWriter out = new PrintWriter(file.getAbsoluteFile());
-
-            try {
-                for(int i = 0; i < list.size(); i++)
-                {
-                    out.print(linesAsArray[i] + "\n");
-                }
-            } finally {
-                out.close();
-            }
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static String removeNumbers(String nameString){
+        return nameString.replaceAll("\\d{7,12}", "[censored]");
     }
 }
