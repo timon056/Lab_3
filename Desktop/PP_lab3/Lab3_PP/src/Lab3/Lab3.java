@@ -1,6 +1,3 @@
-/**
- * Created by Артем on 20.05.2015.
- */
 package Lab3;
 
 import java.io.BufferedReader;
@@ -16,9 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lab3 {
-
     static List<String> lines;
-
     public static void main(String[] args) {
 
         File testFile = new File("test.txt");
@@ -27,8 +22,33 @@ public class Lab3 {
         write("out.txt", lines);
 
     }
+    public static boolean checkWithRegExpName(String testString){
+        Pattern name = Pattern.compile("^[А-Я]{1}[а-я]{2,15}$");
 
+        Matcher match = name.matcher(testString);
+        while(match.find()) {
+            System.out.println(testString.substring(match.start(), match.end()));
+        }
+        return match.matches();
+    }
 
+    public static boolean checkWithRegExpPhone(String testString){
+        Pattern phone = Pattern.compile("^[+]{0,1}[- (),0-9]{7,}$");
+        Matcher match = phone.matcher(testString);
+        while(match.find()) {
+            System.out.println(testString.substring(match.start(), match.end()));
+        }
+        return match.matches();
+    }
+    public static boolean checkWithRegExpEmail(String testString){
+        Pattern phone = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+        Matcher match = phone.matcher(testString);
+        while(match.find()) {
+            System.out.println(testString.substring(match.start(), match.end()));
+        }
+        return match.matches();
+    }
     static public void GetContents(File file)
     {
 
@@ -50,8 +70,8 @@ public class Lab3 {
                 throw new IllegalArgumentException("File cannot be written:" + file);
             }
 
-                if (!file.isFile())
-                {
+            if (!file.isFile())
+            {
                 throw new IllegalArgumentException("Should not be a directory: " + file);
             }
 
@@ -66,7 +86,11 @@ public class Lab3 {
                     String[] test =  line.trim().split("[,;:!?\\s]+");
                     for(int i =0; i < test.length; i++)
                     {
-
+                        if(checkWithRegExpName(test[i]) || checkWithRegExpPhone(test[i]) || checkWithRegExpEmail(test[i]) )
+                        {
+                            test[i]= "[censored]";
+                        }
+                        lines.add(test[i]+ ' ');
                     }
 
                 }
